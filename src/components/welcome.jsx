@@ -184,7 +184,7 @@ const App = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
               <div className="bg-green-50 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-green-600 mb-4">Buyer</h3>
+                <h3 className="text-2xl font-bold text-green-600 mb-4">Farmers</h3>
                 <p className="text-gray-600 mb-6">
                   If you don't have the time or energy to shop yourself, 
                   AgroMart connects you with trusted Buyers who can 
