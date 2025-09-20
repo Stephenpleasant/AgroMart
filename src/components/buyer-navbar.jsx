@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Grid3X3, ShoppingBag, Wallet, Bell, HelpCircle, LogOut, Settings, Menu, X } from 'lucide-react';
+import { Leaf, Grid3X3, ShoppingBag, Wallet, Bell, HelpCircle, LogOut, Settings, Menu, X, MessageCircle } from 'lucide-react';
 
 const BuyerNavbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -11,8 +11,9 @@ const BuyerNavbar = () => {
 
   const navItems = [
     { to: "/buyerdashboard", icon: Grid3X3, label: "Dashboard" },
-    { to: "/orders", icon: ShoppingBag, label: "Order" },
+    { to: "/order", icon: ShoppingBag, label: "Order" },
     { to: "/account", icon: Wallet, label: "Wallet" },
+    { to: "/chat", icon: MessageCircle, label: "Messages" }, // Added chat feature
     { to: "/notifications", icon: Bell, label: "Notification" },
     { to: "/support", icon: HelpCircle, label: "Support" },
     { to: "/settings", icon: Settings, label: "Settings" },

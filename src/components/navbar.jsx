@@ -54,18 +54,7 @@ const Navbar = () => {
                 }`} />
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300"></span>
               </button>
-
-
-
-
-
-
-
-
-
-
-              
-              
+            
               {/* Dropdown Menu */}
               {isSignInDropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
@@ -96,7 +85,7 @@ const Navbar = () => {
             </div>
             
             <Link 
-              to="/auth" 
+              to="/login" 
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
             >
               Login

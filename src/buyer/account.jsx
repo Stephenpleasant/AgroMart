@@ -3,193 +3,261 @@ import {Search, Bell, User, Shield, ArrowRight, CreditCard} from 'lucide-react';
 import BuyerNavbar from '../components/buyer-navbar';
 
 const Account = () => {
+    // Define BASE_URL at the top
+    const BASE_URL = 'https://agromart-4tnl.onrender.com';
+    
     const username = "John Doe"; 
-    const [availableBalance, setAvailableBalance] = useState(52.00);
+    const [availableBalance, setAvailableBalance] = useState(0.00);
     const [escrowBalance, setEscrowBalance] = useState(0.00);
     const [transferAmount, setTransferAmount] = useState('');
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [transactions, setTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // TODO: Replace with actual API call to fetch user data on component mount
     useEffect(() => {
+        // Check authentication first
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('No authentication token found. Please login first.');
+            setLoading(false);
+            setIsAuthenticated(false);
+            return;
+        }
+        
+        setIsAuthenticated(true);
         fetchUserData();
         fetchTransactions();
+        
+        // Check if there's a payment reference in the URL (for redirect flow)
+        const urlParams = new URLSearchParams(window.location.search);
+        const reference = urlParams.get('reference');
+        const status = urlParams.get('status');
+        
+        if (reference && status === 'success') {
+            // Verify the payment
+            verifyPayment(reference);
+            
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (reference && status === 'cancelled') {
+            alert('Payment was cancelled');
+            setIsProcessing(false);
+        }
     }, []);
 
-    // API INTEGRATION POINT 1: Fetch user balance data
+    // API INTEGRATION POINT 1: Fetch user wallet data from your backend
     const fetchUserData = async () => {
         try {
-            // TODO: Replace with your actual API endpoint
-            /*
-            const response = await fetch('/api/user/wallet-data', {
+            setLoading(true);
+            setError(null);
+            
+            const token = localStorage.getItem('token');
+            console.log('Auth token:', token ? 'Found' : 'Not found');
+            
+            if (!token) {
+                throw new Error('No authentication token found. Please login first.');
+            }
+
+            // Using your exact API endpoint
+            const apiUrl = `${BASE_URL}/api/buyer/wallet`;
+            console.log('Fetching wallet data from:', apiUrl);
+
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             });
+            
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.log('Error response body:', errorText);
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    setIsAuthenticated(false);
+                    throw new Error('Session expired. Please login again.');
+                }
+                if (response.status === 404) {
+                    throw new Error('Wallet endpoint not found. Please check with backend team.');
+                }
+                if (response.status === 403) {
+                    throw new Error('Access denied. Please check your permissions.');
+                }
+                if (response.status === 500) {
+                    throw new Error('Server error. Please try again later.');
+                }
+                
+                throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+            }
+            
             const data = await response.json();
-            setAvailableBalance(data.availableBalance);
-            setEscrowBalance(data.escrowBalance);
-            */
+            console.log('Raw wallet data received:', data);
+            
+            // Handle different possible response structures
+            let walletBalance = 0;
+            let escrowAmount = 0;
+            
+            // Try different possible response structures from your backend
+            if (typeof data === 'object') {
+                // Case 1: Direct properties
+                walletBalance = data.availableBalance || data.Balance || data.wallet_balance || 0;
+                escrowAmount = data.escrowBalance || data.escrow || data.escrow_balance || 0;
+                
+                // Case 2: Nested in data property
+                if (data.data) {
+                    walletBalance = data.data.availableBalance || data.data.balance || data.data.wallet_balance || 0;
+                    escrowAmount = data.data.escrowBalance || data.data.escrow || data.data.escrow_balance || 0;
+                }
+                
+                // Case 3: Nested in wallet property
+                if (data.wallet) {
+                    walletBalance = data.wallet.availableBalance || data.wallet.balance || 0;
+                    escrowAmount = data.wallet.escrowBalance || data.wallet.escrow || 0;
+                }
+            }
+            
+            console.log('Processed balances - Available:', walletBalance, 'Escrow:', escrowAmount);
+            
+            // Update state with processed values
+            setAvailableBalance(Number(walletBalance) || 0);
+            setEscrowBalance(Number(escrowAmount) || 0);
+            
         } catch (error) {
-            console.error('Error fetching user data:', error);
-            // TODO: Add error handling UI
+            console.error('Detailed error fetching wallet data:', error);
+            
+            // More specific error messages
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                setError('Network error. Please check your internet connection.');
+            } else if (error.message.includes('CORS')) {
+                setError('CORS error. Please contact the development team.');
+            } else {
+                setError(error.message || 'Failed to load wallet data. Please try again.');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     // API INTEGRATION POINT 2: Fetch transaction history
     const fetchTransactions = async () => {
         try {
-            // TODO: Replace with your actual API endpoint
-            /*
-            const response = await fetch('/api/user/transactions', {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${BASE_URL}/api/buyer/wallet`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            const data = await response.json();
-            setTransactions(data.transactions);
-            */
+            
+            if (response.ok) {
+                const data = await response.json();
+                setTransactions(data.transactions || data || []);
+            } else {
+                console.warn('Failed to fetch transactions:', response.status);
+            }
         } catch (error) {
             console.error('Error fetching transactions:', error);
         }
     };
 
-    // API INTEGRATION POINT 3: Initialize Paystack payment and create escrow transaction
+    // API INTEGRATION POINT 3: Initialize Paystack payment
     const handlePaystackPayment = async () => {
         const amount = parseFloat(transferAmount);
-        if (amount > 0) {
-            setIsProcessing(true);
-            try {
-                // TODO: Replace with your backend API endpoint to initialize Paystack payment
-                /*
-                // Step 1: Create escrow transaction in your backend
-                const escrowResponse = await fetch('/api/payment/initialize-escrow-payment', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        amount: amount * 100, // Paystack expects amount in kobo
-                        currency: 'NGN',
-                        email: 'user@example.com', // Replace with actual user email
-                        transactionType: 'ESCROW_HOLD',
-                        productId: 'PRODUCT_ID_HERE', // Add actual product ID
-                        sellerId: 'SELLER_ID_HERE', // Add actual seller ID
-                        metadata: {
-                            productDetails: 'Product details here',
-                            deliveryAddress: 'User delivery address'
-                        }
-                    })
-                });
+        if (amount <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
 
-                if (escrowResponse.ok) {
-                    const escrowData = await escrowResponse.json();
-                    
-                    // Step 2: Initialize Paystack payment with the reference from backend
-                    const paystackHandler = window.PaystackPop.setup({
-                        key: 'YOUR_PAYSTACK_PUBLIC_KEY', // Replace with your public key
-                        email: 'user@example.com', // Replace with actual user email
-                        amount: amount * 100, // Amount in kobo
-                        currency: 'NGN',
-                        ref: escrowData.reference, // Use reference from backend
-                        callback: function(response) {
-                            // Step 3: Verify payment and update escrow status
-                            verifyPaymentAndUpdateEscrow(response.reference, amount);
-                        },
-                        onClose: function() {
-                            console.log('Payment window closed');
-                            setIsProcessing(false);
-                        }
-                    });
-                    
-                    paystackHandler.openIframe();
-                } else {
-                    throw new Error('Failed to initialize escrow transaction');
-                }
-                */
-                
-                // TEMPORARY: For demo purposes only - remove this in production
-                // Simulate payment success
-                setTimeout(() => {
-                    setEscrowBalance(prev => prev + amount);
-                    const newTransaction = {
-                        id: Date.now(),
-                        amount: amount,
-                        type: 'ESCROW_HOLD',
-                        status: 'PENDING',
-                        date: new Date().toISOString(),
-                        description: 'Payment held in escrow via Paystack'
-                    };
-                    setTransactions(prev => [newTransaction, ...prev]);
-                    setTransferAmount('');
-                    setShowTransferModal(false);
-                    setIsProcessing(false);
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error processing payment:', error);
-                setIsProcessing(false);
-                // TODO: Show error message to user
+        setIsProcessing(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Authentication required');
             }
+
+            // Step 1: Initialize payment with your backend
+            const response = await fetch(`${BASE_URL}/api/payment/deposit/init/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount 
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to initialize payment: ${response.status}`);
+            }
+
+            const paymentData = await response.json();
+            console.log('Payment initialization response:', paymentData);
+            
+            // Step 2: Redirect to Paystack payment page
+            if (paymentData.authorizationUrl || paymentData.data?.authorizationUrl) {
+                const authUrl = paymentData.authorizationUrl || paymentData.data.authorizationUrl;
+                window.location.href = authUrl;
+            } else {
+                throw new Error('No authorization URL received from backend');
+            }
+
+        } catch (error) {
+            console.error('Error initializing payment:', error);
+            setIsProcessing(false);
+            alert(`Failed to initialize payment: ${error.message}`);
         }
     };
 
-    // API INTEGRATION POINT 4: Verify payment and update escrow
-    const verifyPaymentAndUpdateEscrow = async (reference, amount) => {
+    // API INTEGRATION POINT 4: Verify payment after successful Paystack transaction
+    const verifyPayment = async (reference) => {
         try {
-            // TODO: Replace with your backend API endpoint to verify payment
-            /*
-            const verifyResponse = await fetch('/api/payment/verify-paystack-payment', {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${BASE_URL}/api/payment/verify`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     reference: reference
                 })
             });
-
-            if (verifyResponse.ok) {
-                const verificationData = await verifyResponse.json();
-                
-                if (verificationData.status === 'success') {
-                    // Update local state
-                    setEscrowBalance(prev => prev + amount);
-                    
-                    // Add transaction to history
-                    const newTransaction = {
-                        id: verificationData.transactionId,
-                        amount: amount,
-                        type: 'ESCROW_HOLD',
-                        status: 'PENDING',
-                        date: new Date().toISOString(),
-                        description: 'Payment held in escrow via Paystack',
-                        reference: reference
-                    };
-                    setTransactions(prev => [newTransaction, ...prev]);
-                    
-                    setTransferAmount('');
-                    setShowTransferModal(false);
-                    
-                    // TODO: Show success message
-                    alert('Payment successful! Funds are now held in escrow.');
-                } else {
-                    throw new Error('Payment verification failed');
-                }
-            } else {
-                throw new Error('Failed to verify payment');
+            if (!response.ok) {
+                throw new Error('Payment verification failed');
             }
-            */
+
+            const verificationData = await response.json();
+            
+            if (verificationData.status === 'success' || verificationData.data?.status === 'success') {
+                // Refresh wallet data from backend
+                await fetchUserData();
+                await fetchTransactions();
+                
+                // Reset form
+                setTransferAmount('');
+                setShowTransferModal(false);
+                
+                alert('Payment successful! Funds are now held in escrow.');
+            } else {
+                throw new Error('Payment verification failed');
+            }
+            
         } catch (error) {
             console.error('Error verifying payment:', error);
-            // TODO: Show error message to user
+            alert('Payment verification failed. Please contact support.');
         } finally {
             setIsProcessing(false);
         }
@@ -198,47 +266,43 @@ const Account = () => {
     // API INTEGRATION POINT 5: Release escrow funds (called when goods are delivered)
     const handleReleaseEscrow = async (transactionId) => {
         try {
-            // TODO: Replace with your actual API endpoint
-            /*
-            const response = await fetch(`/api/payment/release-escrow/${transactionId}`, {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${BASE_URL}/api/escrow/release/${transactionId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     confirmDelivery: true,
-                    rating: 5, // Optional: product/seller rating
-                    feedback: 'Product delivered as expected' // Optional
+                    rating: 5,
+                    feedback: 'Product delivered as expected'
                 })
             });
 
             if (response.ok) {
-                // Update transaction status and escrow balance
-                const updatedTransaction = await response.json();
-                setTransactions(prev => 
-                    prev.map(t => t.id === transactionId ? updatedTransaction : t)
-                );
-                setEscrowBalance(prev => prev - updatedTransaction.amount);
+                // Refresh data from backend
+                await fetchUserData();
+                await fetchTransactions();
                 
-                // TODO: Show success message
                 alert('Escrow funds released to seller successfully!');
+            } else {
+                throw new Error('Failed to release escrow');
             }
-            */
         } catch (error) {
             console.error('Error releasing escrow:', error);
+            alert('Failed to release escrow funds. Please try again.');
         }
     };
 
-    // API INTEGRATION POINT 6: Handle dispute/refund (if delivery is not confirmed)
+    // API INTEGRATION POINT 6: Handle dispute/refund
     const handleDisputeRefund = async (transactionId) => {
         try {
-            // TODO: Replace with your actual API endpoint
-            /*
-            const response = await fetch(`/api/payment/dispute-refund/${transactionId}`, {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${BASE_URL}/api/escrow/dispute/${transactionId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -248,23 +312,87 @@ const Account = () => {
             });
 
             if (response.ok) {
-                const refundData = await response.json();
-                // Update transaction status
-                setTransactions(prev => 
-                    prev.map(t => t.id === transactionId ? {...t, status: 'REFUNDED'} : t)
-                );
-                setEscrowBalance(prev => prev - refundData.amount);
+                // Refresh data from backend
+                await fetchUserData();
+                await fetchTransactions();
                 
-                // TODO: Show success message
-                alert('Refund initiated successfully!');
+                alert('Dispute initiated successfully!');
+            } else {
+                throw new Error('Failed to initiate dispute');
             }
-            */
         } catch (error) {
             console.error('Error processing refund:', error);
+            alert('Failed to initiate dispute. Please try again.');
         }
     };
 
-   
+    // Handle retry for failed data fetch
+    const handleRetry = () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Please login first to access your wallet.');
+            return;
+        }
+        fetchUserData();
+        fetchTransactions();
+    };
+
+    // Redirect to login function
+    const redirectToLogin = () => {
+        // Replace with your actual login route
+        window.location.href = '/login';
+        // Or if using React Router: navigate('/login');
+    };
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex">
+                <BuyerNavbar />
+                <div className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Loading wallet data...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state - Enhanced for authentication issues
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex">
+                <BuyerNavbar />
+                <div className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="text-red-600 mb-4">
+                            <p className="text-lg font-medium">Error Loading Wallet</p>
+                            <p className="text-sm">{error}</p>
+                        </div>
+                        <div className="space-x-3">
+                            {!isAuthenticated ? (
+                                <button 
+                                    onClick={redirectToLogin}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                >
+                                    Go to Login
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={handleRetry}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                                >
+                                    Retry
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return ( 
         <div className="min-h-screen bg-gray-100 flex">
             <BuyerNavbar />
@@ -300,7 +428,7 @@ const Account = () => {
                             
                             <div className="mb-6">
                                 <div className="text-3xl font-mono tracking-wider">
-                                    #{availableBalance.toFixed(2)}
+                                    ₦{availableBalance.toFixed(2)}
                                 </div>
                                 <p className="text-gray-400 text-sm mt-1">Available Balance</p>
                             </div>
@@ -329,7 +457,7 @@ const Account = () => {
                                     <Shield size={20} className="text-blue-600 mr-2" />
                                     <p className="text-blue-600 text-sm font-medium">Escrow Account</p>
                                 </div>
-                                <div className="text-3xl font-bold mb-2 text-blue-600">#{escrowBalance.toFixed(2)}</div>
+                                <div className="text-3xl font-bold mb-2 text-blue-600">₦{escrowBalance.toFixed(2)}</div>
                                 <p className="text-gray-500 text-xs mb-4">Funds held for pending purchases</p>
                                 <div className="mt-4 pt-4 border-t">
                                     <p className="text-gray-500 text-sm">Status</p>
@@ -377,11 +505,11 @@ const Account = () => {
                             {transactions.length > 0 ? (
                                 <div className="space-y-4">
                                     {transactions.map((transaction) => (
-                                        <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                        <div key={transaction.id || transaction._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                                             <div className="flex-1">
-                                                <p className="font-medium">#{transaction.amount.toFixed(2)}</p>
-                                                <p className="text-sm text-gray-500">{transaction.description}</p>
-                                                <p className="text-xs text-gray-400">{new Date(transaction.date).toLocaleDateString()}</p>
+                                                <p className="font-medium">₦{(transaction.amount || 0).toFixed(2)}</p>
+                                                <p className="text-sm text-gray-500">{transaction.description || 'Transaction'}</p>
+                                                <p className="text-xs text-gray-400">{new Date(transaction.date || transaction.createdAt).toLocaleDateString()}</p>
                                                 {transaction.reference && (
                                                     <p className="text-xs text-gray-400">Ref: {transaction.reference}</p>
                                                 )}
@@ -393,18 +521,18 @@ const Account = () => {
                                                     transaction.status === 'REFUNDED' ? 'bg-red-100 text-red-800' :
                                                     'bg-gray-100 text-gray-800'
                                                 }`}>
-                                                    {transaction.status}
+                                                    {transaction.status || 'UNKNOWN'}
                                                 </span>
                                                 {transaction.status === 'PENDING' && (
                                                     <div className="mt-2 space-x-2">
                                                         <button 
-                                                            onClick={() => handleReleaseEscrow(transaction.id)}
+                                                            onClick={() => handleReleaseEscrow(transaction.id || transaction._id)}
                                                             className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
                                                         >
                                                             Confirm Delivery
                                                         </button>
                                                         <button 
-                                                            onClick={() => handleDisputeRefund(transaction.id)}
+                                                            onClick={() => handleDisputeRefund(transaction.id || transaction._id)}
                                                             className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
                                                         >
                                                             Dispute
@@ -435,7 +563,7 @@ const Account = () => {
                     <div className="bg-white rounded-lg p-6 w-96">
                         <h3 className="text-lg font-bold mb-4">Make Payment via Paystack</h3>
                         <div className="mb-4">
-                            <p className="text-sm text-gray-600 mb-4">Current Escrow: #{escrowBalance.toFixed(2)}</p>
+                            <p className="text-sm text-gray-600 mb-4">Current Escrow: ₦{escrowBalance.toFixed(2)}</p>
                             <div className="bg-blue-50 p-3 rounded-lg mb-4">
                                 <p className="text-xs text-blue-700 mb-2">
                                     <Shield size={14} className="inline mr-1" />
@@ -449,7 +577,7 @@ const Account = () => {
                                 type="number"
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}
-                                placeholder="Enter payment amount (NGN)"
+                                placeholder="Enter payment amount (₦)"
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                                 step="0.01"
                                 min="1"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import BuyerNavbar from "../components/buyer-navbar";
-import { ChevronLeft, ChevronRight, Search,  MapPin, Link, } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Buyer = () => {
     const [products, setProducts] = useState([]);
@@ -10,7 +11,6 @@ const Buyer = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
-    const [cart, setCart] = useState([]);
 
     const itemsPerPage = 4; // 4 products per page as requested
 
@@ -26,12 +26,41 @@ const Buyer = () => {
         { id: 'seedlings', name: 'Seedlings' }
     ];
 
-    // Backend API endpoints
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    // Backend API endpoints - REPLACE WITH YOUR BACKEND URL
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agromart-4tnl.onrender.com';
     const API_ENDPOINTS = {
-        products: `${API_BASE_URL}/api/products`,
-        addToCart: `${API_BASE_URL}/api/cart/add`,
-        uploadProduct: `${API_BASE_URL}/api/products/upload` // For sellers
+        products: `${API_BASE_URL}/api/product/all`,
+    };
+
+    // Function to map backend product data to frontend format
+    const mapBackendProductToFrontend = (backendProduct) => {
+        console.log('Mapping product:', backendProduct); // Debug log
+        
+        return {
+            _id: backendProduct._id || backendProduct.id,
+            name: backendProduct.name || backendProduct.title,
+            category: backendProduct.category || 'uncategorized',
+            location: backendProduct.location || 'Unknown',
+            price: backendProduct.price || 'Contact for price',
+            image: backendProduct.images || backendProduct.images?.[0] || '/images/default-product.jpg',
+            description: backendProduct.description || 'No description available',
+            sellerId: backendProduct.sellerId || backendProduct.seller?._id,
+            seller: backendProduct.seller ? {
+                _id: backendProduct.seller._id || backendProduct.seller.id,
+                name: backendProduct.seller.fullName || 'Unknown Seller',
+                phone: backendProduct.seller.phone || 'N/A',
+                avatar: backendProduct.seller.avatar || `/images/avatars/${(backendProduct.seller.name || 'default').toLowerCase().replace(' ', '-')}.jpg`,
+                rating: backendProduct.seller.rating || 4.0
+            } : {
+                _id: 'unknown',
+                name: 'Unknown Seller',
+                avatar: '/images/avatars/default.jpg',
+                rating: 4.0
+            },
+            createdAt: backendProduct.createdAt ? new Date(backendProduct.createdAt) : new Date(),
+            inStock: backendProduct.inStock !== undefined ? backendProduct.inStock : true,
+            rating: backendProduct.rating || backendProduct.seller?.rating || 4.0
+        };
     };
 
     // Fetch products from backend
@@ -47,20 +76,54 @@ const Buyer = () => {
                 category: selectedCategory === 'all' ? '' : selectedCategory
             });
 
-            const response = await fetch(`${API_ENDPOINTS.products}?${queryParams}`);
+            console.log('Making GET request to:', `${API_ENDPOINTS.products}?${queryParams}`);
+            
+            const response = await fetch(`${API_ENDPOINTS.products}?${queryParams}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            
+            console.log('Response status:', response.status);
             
             if (!response.ok) {
-                throw new Error('Failed to fetch products');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            
-            setProducts(data.products || []);
-            setTotalPages(Math.ceil(data.total / itemsPerPage));
+            console.log('Backend response data:', data);
+
+            // Handle different response structures
+            let productsArray = [];
+            if (Array.isArray(data)) {
+                // If data is directly an array of products
+                productsArray = data;
+            } else if (data.products && Array.isArray(data.products)) {
+                // If data has a products property
+                productsArray = data.products;
+            } else if (data.data && Array.isArray(data.data)) {
+                // If data has a data property
+                productsArray = data.data;
+            } else {
+                console.warn('Unexpected response structure:', data);
+                productsArray = [];
+            }
+
+            console.log('Products array before mapping:', productsArray);
+
+            // Map backend products to frontend format
+            const mappedProducts = productsArray.map(mapBackendProductToFrontend);
+
+            setProducts(mappedProducts);
+            setTotalPages(Math.ceil((data.total || data.totalCount || data.pagination?.total || mappedProducts.length) / itemsPerPage));
+
+            console.log('Mapped products:', mappedProducts);
 
         } catch (err) {
             console.error('Error fetching products:', err);
-            setError('Failed to load products. Using demo data.');
+            setError(`Failed to load products from backend: ${err.message}. Using demo data.`);
             
             // Fallback to demo data
             loadDemoData();
@@ -69,67 +132,16 @@ const Buyer = () => {
         }
     };
 
-    // Demo data fallback
+    // Demo data fallback (Fixed - should be an array)
     const loadDemoData = () => {
         const demoProducts = [
-            {
-                _id: '1',
-                name: "Fresh Yams",
-                category: "tubers",
-                location: "Lagos",
-                price: 3000,
-                image: "yams.jpeg",
-                description: "Fresh, organic yams from Lagos farms",
-                seller: {
-                    _id: 'seller1',
-                    name: "Alex Sandra",
-                    avatar: "/images/avatars/alex-sandra.jpg",
-                    rating: 4.5
-                },
-                createdAt: new Date(),
-                inStock: true
-            },
-            {
-                _id: '2',
-                name: "Fresh Fishes",
-                category: "vegetables",
-                location: "Kano",
-                price: 1500,
-                image: "public/fishes.jpeg",
-                description: "Juicy red tomatoes, perfect for cooking",
-                seller: {
-                    _id: 'seller2',
-                    name: "John Doe",
-                    avatar: "/images/avatars/john-doe.jpg",
-                    rating: 4.8
-                },
-                createdAt: new Date(),
-                inStock: true
-            },
-            {
-                _id: '3',
-                name: "Sweet Potatoes",
-                category: "tubers",
-                location: "Jos",
-                price: 2000,
-                image: "potatoes.jpeg",
-                description: "Sweet and nutritious potatoes",
-                seller: {
-                    _id: 'seller3',
-                    name: "Mary Johnson",
-                    avatar: "/images/avatars/mary-johnson.jpg",
-                    rating: 4.3
-                },
-                createdAt: new Date(),
-                inStock: true
-            },
             {
                 _id: '4',
                 name: "Fresh Carrots",
                 category: "vegetables",
                 location: "Abuja",
                 price: 800,
-                image: "vegetables.jpeg",
+                image: "/images/vegetables.jpeg",
                 description: "Crunchy orange carrots, rich in vitamins",
                 seller: {
                     _id: 'seller4',
@@ -189,6 +201,12 @@ const Buyer = () => {
         }).format(price);
     };
 
+    const handleViewMore = (product) => {
+    console.log('Navigating to order page with product:', product);
+    // Cache the product data so the Order page can access it immediately
+    localStorage.setItem(`product_${product._id}`, JSON.stringify(product));
+};
+
     return ( 
         <div className="min-h-screen bg-gray-50">
             <BuyerNavbar />
@@ -243,7 +261,7 @@ const Buyer = () => {
                     <div className="max-w-lg">
                         <h1 className="text-3xl md:text-4xl font-bold mb-4">Discover</h1>
                         <p className="text-base md:text-lg mb-6 text-purple-100">
-                            Find the best agricultural products from verified farmers – at your price.
+                            Find the best agricultural products from verified farmers — at your price.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
                             <div className="bg-white bg-opacity-20 px-3 py-1 rounded-full w-fit">
@@ -307,7 +325,7 @@ const Buyer = () => {
                                     {/* Product Image */}
                                     <div className="w-full h-48 overflow-hidden bg-gray-100">
                                         <img 
-                                            src={product.image} 
+                                            src={product.images} 
                                             alt={product.name}
                                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                                             onError={(e) => {
@@ -339,11 +357,11 @@ const Buyer = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <Link to="/profile">
-                                    <button className='w-full py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-green-500 hover:bg-green-800 text-white'>
-                                        View Profile
-                                    </button>
-                                    </Link>
+                                   <Link to={`/order/${product._id}`} onClick={() => handleViewMore(product)}>
+                                      <button className='w-full py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-green-500 hover:bg-green-800 text-white'>
+                                           View More
+                                               </button>
+                                           </Link>
                                 </div>
                             </div>
                         ))}
@@ -401,12 +419,12 @@ const Buyer = () => {
 
                 {/* Backend Integration Info */}
                 <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-2">Backend Integration Ready</h3>
+                    <h3 className="font-semibold text-blue-900 mb-2">Backend Integration Active</h3>
                     <div className="text-sm text-blue-800 space-y-1">
-                        <p><strong>Products API:</strong> {API_ENDPOINTS.products}</p>
-                        <p><strong>Upload API:</strong> {API_ENDPOINTS.uploadProduct}</p>
+                        <p><strong>GET Request URL:</strong> {API_ENDPOINTS.products}</p>
+                        <p><strong>Current Status:</strong> {error ? 'Using Demo Data' : 'Connected to Backend'}</p>
                         <p className="mt-2 text-blue-600">
-                            Backend endpoints are configured. When your backend is ready, products will automatically load from your API.
+                            Check browser console for detailed request/response logs.
                         </p>
                     </div>
                 </div>

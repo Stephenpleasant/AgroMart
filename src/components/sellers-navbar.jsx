@@ -10,9 +10,9 @@ const SellersNavbar = () => {
   };
 
   const navItems = [
-    { to: "/buyerdashboard", icon: Grid3X3, label: "Dashboard" },
+    { to: "/sellerdashboard", icon: Grid3X3, label: "Dashboard" }, // Fixed: changed from "/sellers" to "/sellerdashboard"
     { to: "/orders", icon: ShoppingBag, label: "Order" },
-    { to: "/account", icon: Wallet, label: "Wallet" },
+    { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/notifications", icon: Bell, label: "Notification" },
     { to: "/support", icon: HelpCircle, label: "Support" },
     { to: "/settings", icon: Settings, label: "Settings" },
