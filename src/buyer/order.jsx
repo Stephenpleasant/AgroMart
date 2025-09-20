@@ -260,7 +260,7 @@ const Order = () => {
                 <BuyerNavbar />
                 <div className="md:ml-64 ml-0 p-4 md:p-6 pt-16 md:pt-6">
                     <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                         <span className="ml-3 text-gray-600">Loading product details...</span>
                     </div>
                 </div>
@@ -276,7 +276,7 @@ const Order = () => {
                     <div className="text-center py-12">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h2>
                         <p className="text-gray-600 mb-4">The product you're looking for could not be found.</p>
-                        <Link to="/buyer-dashboard" className="text-purple-600 hover:text-purple-700">
+                        <Link to="/buyer-dashboard" className="text-green-600 hover:text-green-700">
                             ← Back to Products
                         </Link>
                     </div>
@@ -324,7 +324,7 @@ const Order = () => {
                                             key={index}
                                             onClick={() => setSelectedImageIndex(index)}
                                             className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                                                selectedImageIndex === index ? 'border-purple-500' : 'border-gray-200'
+                                                selectedImageIndex === index ? 'border-green-500' : 'border-gray-200'
                                             }`}
                                         >
                                             <img 

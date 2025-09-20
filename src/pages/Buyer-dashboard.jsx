@@ -246,7 +246,7 @@ const Buyer = () => {
                                 onClick={() => handleCategoryChange(category.id)}
                                 className={`px-3 md:px-6 py-2 rounded-full transition-colors text-sm ${
                                     selectedCategory === category.id
-                                        ? 'bg-purple-500 text-white'
+                                        ? 'bg-green-500 text-white'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
@@ -257,11 +257,11 @@ const Buyer = () => {
                 </div>
 
                 {/* Discover Section */}
-                <div className="mb-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl p-6 md:p-8 text-white">
+                <div className="mb-12 bg-gradient-to-r from-green-600 to-green-800 rounded-2xl p-6 md:p-8 text-white">
                     <div className="max-w-lg">
                         <h1 className="text-3xl md:text-4xl font-bold mb-4">Discover</h1>
-                        <p className="text-base md:text-lg mb-6 text-purple-100">
-                            Find the best agricultural products from verified farmers — at your price.
+                        <p className="text-base md:text-lg mb-6 text-green-100">
+                            Find the best agricultural products from verified users — at your price.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
                             <div className="bg-white bg-opacity-20 px-3 py-1 rounded-full w-fit">
@@ -277,7 +277,7 @@ const Buyer = () => {
                 {/* Loading State */}
                 {loading && (
                     <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                         <span className="ml-3 text-gray-600">Loading products...</span>
                     </div>
                 )}
@@ -397,7 +397,7 @@ const Buyer = () => {
                                     onClick={() => handlePageChange(index + 1)}
                                     className={`px-2 md:px-3 py-2 rounded-lg transition-colors text-sm ${
                                         currentPage === index + 1
-                                            ? 'bg-purple-600 text-white'
+                                            ? 'bg-green-600 text-white'
                                             : 'bg-white border border-gray-300 hover:bg-gray-50'
                                     }`}
                                 >
@@ -417,17 +417,7 @@ const Buyer = () => {
                     </div>
                 )}
 
-                {/* Backend Integration Info */}
-                <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-2">Backend Integration Active</h3>
-                    <div className="text-sm text-blue-800 space-y-1">
-                        <p><strong>GET Request URL:</strong> {API_ENDPOINTS.products}</p>
-                        <p><strong>Current Status:</strong> {error ? 'Using Demo Data' : 'Connected to Backend'}</p>
-                        <p className="mt-2 text-blue-600">
-                            Check browser console for detailed request/response logs.
-                        </p>
-                    </div>
-                </div>
+                
             </div>
         </div>  
     );

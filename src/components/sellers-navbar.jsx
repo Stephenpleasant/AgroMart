@@ -59,12 +59,12 @@ const SellersNavbar = () => {
                 key={item.to}
                 to={item.to} 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center space-x-4 px-4 py-3 rounded-xl hover:bg-purple-50 hover:border hover:border-purple-200 transition-all group relative"
+                className="flex items-center space-x-4 px-4 py-3 rounded-xl hover:bg-green-50 hover:border hover:border-green-200 transition-all group relative"
               >
-                <Icon size={22} className="text-gray-600 group-hover:text-purple-600" />
-                <span className="text-sm text-gray-700 group-hover:text-purple-600 font-medium">{item.label}</span>
+                <Icon size={22} className="text-gray-600 group-hover:text-green-600" />
+                <span className="text-sm text-gray-700 group-hover:text-green-600 font-medium">{item.label}</span>
                 {/* Active indicator dot */}
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-purple-600 rounded-r hidden group-hover:block"></div>
+                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-green-600 rounded-r hidden group-hover:block"></div>
               </Link>
             );
           })}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Leaf, Users, Award, ArrowRight, Phone, Mail, MapPin, ShoppingCart, Star, CheckCircle, Shield, CreditCard, Truck } from 'lucide-react';
+import { Leaf, Users,  ShoppingCart, Star,  Shield, CreditCard } from 'lucide-react';
 import Navbar from './navbar';
 
 const App = () => {
@@ -20,19 +20,19 @@ const App = () => {
             <div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
                 Connecting 
-                <span className="text-purple-600 block">Buyers</span>
-                <span className="text-gray-800">and personal</span>
-                <span className="text-gray-800">shoppers</span>
+                <span className="text-green-600 block">users</span>
+                <span className="text-gray-800">and Buyers</span>
+    
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 Whether you're buying or helping others shop, AgroMart
                 makes the process easy, secure, and rewarding.
               </p>
               <div className="flex space-x-4">
-                <button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105">
                   Sign up
                 </button>
-                <button className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300">
+                <button className="border border-gray-300 text-green-700 hover:bg-green-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300">
                   Login
                 </button>
               </div>
@@ -48,8 +48,8 @@ const App = () => {
                     <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=100&fit=crop&crop=face" alt="Shopper 4" className="w-full h-20 object-cover rounded-lg" />
                   </div>
                   <div className="text-center">
-                    <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop&crop=face" alt="Main shopper" className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-purple-200" />
-                    <div className="text-sm text-gray-600">Connect with trusted shoppers</div>
+                    <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop&crop=face" alt="Main shopper" className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-green-200" />
+                    <div className="text-sm text-gray-600">Connect with trusted Buyers</div>
                   </div>
                 </div>
               </div>
@@ -74,14 +74,14 @@ const App = () => {
             
             <div>
               <p className="text-lg text-gray-600 mb-6">
-                AgroMart connects buyers with trusted personal shoppers who purchase and deliver fresh agri products exactly what they want.
+                AgroMart connects buyers with trusted personal Buyers who purchase and deliver fresh agri products exactly what they want.
               </p>
               <p className="text-lg text-gray-600 mb-8">
-                Buyers post requests, get competitive bids, and choose the best offer. Shoppers earn flexibly while helping others.
+                Buyers post requests, get competitive bids, and choose the best offer. Buyers earn flexibly while helping others.
               </p>
               <div className="flex space-x-4">
-                <button className="bg-green-900 text-white px-6 py-3 rounded-full font-semibold">Users</button>
-                <button className="bg-purple-100 text-purple-600 px-6 py-3 rounded-full font-semibold">Shoppers</button>
+                <button className="bg-green-900 text-white px-6 py-3 rounded-full font-semibold">Farmers</button>
+                <button className="bg-green-100 text-green-600 px-6 py-3 rounded-full font-semibold">Buyers</button>
               </div>
             </div>
           </div>
@@ -93,8 +93,8 @@ const App = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="flex justify-center space-x-4 mb-8">
-              <button className="bg-purple-600 text-white px-6 py-3 rounded-full font-semibold">Users</button>
-              <button className="bg-purple-100 text-purple-600 px-6 py-3 rounded-full font-semibold">Shoppers</button>
+              <button className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold">Farmers</button>
+              <button className="bg-green-100 text-green-600 px-6 py-3 rounded-full font-semibold">Buyers</button>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
               Shop in 4 Easy Steps
@@ -116,7 +116,7 @@ const App = () => {
                 <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=150&fit=crop" alt="Receive Bids" className="w-full h-24 object-cover rounded-lg" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Receive Bids</h3>
-              <p className="text-gray-600">Get proposals from qualified shoppers with pricing and timelines.</p>
+              <p className="text-gray-600">Get proposals from qualified Buyers with pricing and timelines.</p>
             </div>
             
             <div className="text-center p-6">
@@ -151,8 +151,8 @@ const App = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="bg-black bg-opacity-50 p-6 rounded-xl text-center backdrop-blur-sm">
               <Shield className="h-12 w-12 text-white mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Verified Shoppers</h3>
-              <p className="text-gray-300 text-sm">Browse shoppers by category, view their profiles and ratings.</p>
+              <h3 className="text-xl font-semibold mb-2">Verified Buyers</h3>
+              <p className="text-gray-300 text-sm">Browse Buyers by category, view their profiles and ratings.</p>
             </div>
             
             <div className="bg-black bg-opacity-50 p-6 rounded-xl text-center backdrop-blur-sm">
@@ -183,14 +183,14 @@ const App = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <div className="bg-purple-50 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-purple-600 mb-4">Buyer</h3>
+              <div className="bg-green-50 rounded-2xl p-8">
+                <h3 className="text-2xl font-bold text-green-600 mb-4">Buyer</h3>
                 <p className="text-gray-600 mb-6">
                   If you don't have the time or energy to shop yourself, 
-                  AgroMart connects you with trusted shoppers who can 
+                  AgroMart connects you with trusted Buyers who can 
                   make the trips easy, secure, and rewarding.
                 </p>
-                <button className="bg-purple-600 text-white px-6 py-3 rounded-full font-semibold">
+                <button className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold">
                   Sign up
                 </button>
               </div>
@@ -203,14 +203,14 @@ const App = () => {
             <div>
               <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop" alt="Shopping bags" className="w-full h-48 object-cover rounded-2xl mb-8" />
               
-              <div className="bg-purple-50 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-purple-600 mb-4">Shoppers</h3>
+              <div className="bg-green-50 rounded-2xl p-8">
+                <h3 className="text-2xl font-bold text-green-600 mb-4">Buyers</h3>
                 <p className="text-gray-600 mb-6">
-                  For reliable shoppers who want to earn money by 
+                  For reliable Buyers who want to earn money by 
                   helping others buy and deliver the things they need 
                   while working on their own schedule.
                 </p>
-                <button className="bg-purple-600 text-white px-6 py-3 rounded-full font-semibold">
+                <button className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold">
                   Sign up
                 </button>
               </div>
@@ -223,7 +223,7 @@ const App = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="text-sm text-purple-600 font-semibold mb-2">Testimonials</div>
+            <div className="text-sm text-green-600 font-semibold mb-2">Testimonials</div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
               What People Say When We Pitch AgroMart
             </h2>
@@ -249,7 +249,7 @@ const App = () => {
             <div className="bg-yellow-50 p-8 rounded-2xl">
               <div className="text-4xl text-yellow-500 mb-4">"</div>
               <p className="text-gray-800 mb-6">
-                Wait— I can just send what I want, and verified shoppers will bid to buy it for me? That's genius.
+                Wait— I can just send what I want, and verified Buyers will bid to buy it for me? That's genius.
               </p>
               <div className="text-sm text-gray-600">— Annie, Busy Mum</div>
             </div>
@@ -290,7 +290,7 @@ const App = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Have more questions?</h3>
               <p className="text-gray-600 mb-6">Send a direct email to our customer care</p>
-              <button className="bg-purple-600 text-white px-8 py-3 rounded-full font-semibold">
+              <button className="bg-green-600 text-white px-8 py-3 rounded-full font-semibold">
                 Send Email
               </button>
             </div>
@@ -312,18 +312,18 @@ const App = () => {
                 <input
                   type="text"
                   placeholder="John Smith"
-                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               <div>
                 <input
                   type="email"
                   placeholder="johnsmith@gmail.com"
-                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               <div className="md:col-span-2">
-                <select className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <select className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500">
                   <option>General Inquiry</option>
                   <option>Support</option>
                   <option>Partnership</option>
@@ -333,13 +333,13 @@ const App = () => {
                 <textarea
                   rows={4}
                   placeholder="Write your full message here"
-                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
                 >
                   Send Message
                 </button>
@@ -350,16 +350,16 @@ const App = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-purple-600">
+      <section className="py-20 bg-green-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-white rounded-2xl p-8 shadow-xl">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Ready to make shopping easier or earn as a personal shopper?
             </h2>
             <div className="flex justify-center mb-6">
-              <ShoppingCart className="h-16 w-16 text-purple-600" />
+              <ShoppingCart className="h-16 w-16 text-green-600" />
             </div>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105">
+            <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105">
               Get started
             </button>
           </div>
@@ -367,7 +367,7 @@ const App = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-purple-700 text-white py-12">
+      <footer className="bg-green-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
@@ -376,7 +376,7 @@ const App = () => {
             </div>
             <div className="text-center md:text-right">
               <p className="mb-2">Get our app now to get updates on our offers</p>
-              <button className="bg-white text-purple-700 px-6 py-2 rounded-full font-semibold">
+              <button className="bg-white text-green-700 px-6 py-2 rounded-full font-semibold">
                 Subscribe
               </button>
             </div>
