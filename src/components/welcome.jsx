@@ -20,7 +20,7 @@ const App = () => {
             <div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
                 Connecting 
-                <span className="text-green-600 block">users</span>
+                <span className="text-green-600 block">Farmers</span>
                 <span className="text-gray-800">and Buyers</span>
     
               </h1>
