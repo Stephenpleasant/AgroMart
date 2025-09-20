@@ -436,18 +436,6 @@ const Sellers = () => {
                         </button>
                     </div>
                 )}
-
-                {/* Backend Integration Info */}
-                <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h3 className="font-semibold text-green-900 mb-2">Seller Dashboard Features</h3>
-                    <div className="text-sm text-green-800 space-y-1">
-                        <p><strong>Your Products API:</strong> {API_ENDPOINTS.sellerProducts}</p>
-                        <p><strong>Upload API:</strong> {API_ENDPOINTS.uploadProduct}</p>
-                        <p className="mt-2 text-green-600">
-                            This dashboard shows only products uploaded by you. Upload functionality will integrate with your backend when ready.
-                        </p>
-                    </div>
-                </div>
             </div>
 
             {/* Upload Modal Placeholder */}
