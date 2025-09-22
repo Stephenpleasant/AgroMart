@@ -32,7 +32,7 @@ const Order = () => {
             console.log('Fetching product with ID:', productId);
             
             // Try to fetch from your backend first
-            const response = await fetch(`${API_BASE_URL}/api/product/${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/product/product/${productId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
