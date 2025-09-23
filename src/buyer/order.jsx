@@ -4,7 +4,7 @@ import BuyerNavbar from '../components/buyer-navbar';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const Order = () => {
-    const { productId } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -17,22 +17,22 @@ const Order = () => {
     // Backend API endpoints
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agromart-4tnl.onrender.com';
     const API_ENDPOINTS = {
-        product: `${API_BASE_URL}/api/product/${productId}`,
+        product: `${API_BASE_URL}/api/product/product/${id}`,
         createEscrowPayment: `${API_BASE_URL}/api/order/order/place`
     };
 
     useEffect(() => {
         fetchProductDetails();
-    }, [productId]);
+    }, [id]);
 
     // Fetch product details from backend
     const fetchProductDetails = async () => {
         setLoading(true);
         try {
-            console.log('Fetching product with ID:', productId);
+            console.log('Fetching product with ID:', id);
             
             // Try to fetch from your backend first
-            const response = await fetch(`${API_BASE_URL}/api/product/${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/product/product/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ const Order = () => {
             console.log('Falling back to check if product exists in localStorage or demo data');
             
             // Fallback: Try to get product data from localStorage if it was stored during navigation
-            const cachedProduct = localStorage.getItem(`product_${productId}`);
+            const cachedProduct = localStorage.getItem(`product_${id}`);
             if (cachedProduct) {
                 console.log('Found cached product data');
                 const parsedProduct = JSON.parse(cachedProduct);
@@ -183,7 +183,7 @@ const Order = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    productId: product._id,
+                    id: product._id,
                     sellerId: product.seller._id,
                     quantity: quantity,
                     unitPrice: product.price,

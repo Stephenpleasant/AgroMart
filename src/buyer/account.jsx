@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Search, Bell, User, Shield, ArrowRight, CreditCard} from 'lucide-react';
+import {Search, Bell, User, Shield, ArrowRight, CreditCard, Menu, X} from 'lucide-react';
 import BuyerNavbar from '../components/buyer-navbar';
 
 const Account = () => {
@@ -16,6 +16,8 @@ const Account = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('all');
 
     useEffect(() => {
         // Check authentication first
@@ -344,12 +346,22 @@ const Account = () => {
         // Or if using React Router: navigate('/login');
     };
 
+    // Filter transactions based on active tab
+    const filteredTransactions = transactions.filter(transaction => {
+        if (activeTab === 'escrow') {
+            return transaction.status === 'PENDING';
+        }
+        return true; // Show all for 'all' tab
+    });
+
     // Loading state
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-100 flex">
-                <BuyerNavbar />
-                <div className="flex-1 ml-64 p-8 flex items-center justify-center">
+                <div className="hidden lg:block">
+                    <BuyerNavbar />
+                </div>
+                <div className="flex-1 lg:ml-64 p-4 lg:p-8 flex items-center justify-center">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
                         <p className="text-gray-600">Loading wallet data...</p>
@@ -363,9 +375,11 @@ const Account = () => {
     if (error) {
         return (
             <div className="min-h-screen bg-gray-100 flex">
-                <BuyerNavbar />
-                <div className="flex-1 ml-64 p-8 flex items-center justify-center">
-                    <div className="text-center">
+                <div className="hidden lg:block">
+                    <BuyerNavbar />
+                </div>
+                <div className="flex-1 lg:ml-64 p-4 lg:p-8 flex items-center justify-center">
+                    <div className="text-center px-4">
                         <div className="text-red-600 mb-4">
                             <p className="text-lg font-medium">Error Loading Wallet</p>
                             <p className="text-sm">{error}</p>
@@ -395,181 +409,285 @@ const Account = () => {
 
     return ( 
         <div className="min-h-screen bg-gray-100 flex">
-            <BuyerNavbar />
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:block">
+                <BuyerNavbar />
+            </div>
 
-            {/* Main Content - Shifted to avoid navbar overlap */}
-            <div className="flex-1 ml-64 p-8">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900">My Wallets</h1>
-                    <div className="flex items-center space-x-4">
-                        <Bell size={20} className="text-gray-500" />
-                        <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                                <User size={16} className="text-white" />
-                            </div>
-                            <span className="text-sm font-medium">{username}</span>
+            {/* Mobile Navigation Overlay */}
+            {isMobileMenuOpen && (
+                <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
+                    <div className="w-64 h-full bg-white">
+                        <div className="p-4 border-b flex justify-between items-center">
+                            <h2 className="font-bold text-gray-900">Menu</h2>
+                            <button 
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="p-1 hover:bg-gray-100 rounded"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <BuyerNavbar />
+                    </div>
+                </div>
+            )}
+
+            {/* Main Content - Responsive layout */}
+            <div className="flex-1 lg:ml-64 w-full">
+                {/* Mobile Header */}
+                <div className="lg:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="p-2 hover:bg-gray-100 rounded-lg"
+                    >
+                        <Menu size={20} />
+                    </button>
+                    <h1 className="text-lg font-bold text-gray-900">My Wallets</h1>
+                    <div className="flex items-center space-x-2">
+                        <Bell size={18} className="text-gray-500" />
+                        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                            <User size={14} className="text-white" />
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column - Balance and Escrow */}
-                    <div className="lg:col-span-1">
-                        {/* Virtual Card - Balance Display */}
-                        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 text-white mb-6">
-                            <div className="flex justify-between items-start mb-8">
-                                <div>
-                                    <span className="text-gray-300 text-sm">AgroMart</span>
-                                    <p className="text-xs text-gray-400">Digital Wallet</p>
+                <div className="p-4 lg:p-8">
+                    {/* Desktop Header */}
+                    <div className="hidden lg:flex justify-between items-center mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900">My Wallets</h1>
+                        <div className="flex items-center space-x-4">
+                            <Bell size={20} className="text-gray-500" />
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                                    <User size={16} className="text-white" />
                                 </div>
-                                <div className="w-8 h-6 bg-gradient-to-r from-yellow-400 to-red-500 rounded"></div>
+                                <span className="text-sm font-medium">{username}</span>
                             </div>
-                            
-                            <div className="mb-6">
-                                <div className="text-3xl font-mono tracking-wider">
-                                    ₦{availableBalance.toFixed(2)}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-8">
+                        {/* Balance and Escrow Cards */}
+                        <div className="xl:col-span-1 space-y-4 lg:space-y-6">
+                            {/* Virtual Card - Balance Display */}
+                            <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-4 lg:p-6 text-white">
+                                <div className="flex justify-between items-start mb-6 lg:mb-8">
+                                    <div>
+                                        <span className="text-gray-300 text-sm">AgroMart</span>
+                                        <p className="text-xs text-gray-400">Digital Wallet</p>
+                                    </div>
+                                    <div className="w-8 h-6 bg-gradient-to-r from-yellow-400 to-red-500 rounded"></div>
                                 </div>
-                                <p className="text-gray-400 text-sm mt-1">Available Balance</p>
+                                
+                                <div className="mb-4 lg:mb-6">
+                                    <div className="text-2xl lg:text-3xl font-mono tracking-wider">
+                                        ₦{availableBalance.toFixed(2)}
+                                    </div>
+                                    <p className="text-gray-400 text-sm mt-1">Available Balance</p>
+                                </div>
+                                
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-xs text-gray-400">Secure Payment</p>
+                                    </div>
+                                    <div className="flex items-center">
+                                       <button 
+                                            onClick={() => setShowTransferModal(true)}
+                                            disabled={isProcessing}
+                                            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1.5 text-xs lg:text-sm rounded-lg flex items-center space-x-1 lg:space-x-2 transition-colors"
+                                        >
+                                            <span>{isProcessing ? 'Processing...' : 'Make Payment'}</span>
+                                            <ArrowRight size={12} className="lg:w-4 lg:h-4" />
+                                       </button>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="text-xs text-gray-400">Secure Payment</p>
-                                </div>
-                                <div className="flex items-center">
-                                   <button 
-                                        onClick={() => setShowTransferModal(true)}
-                                        disabled={isProcessing}
-                                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1.5 text-sm rounded-lg flex items-center space-x-2 transition-colors"
-                                    >
-                                        <span>{isProcessing ? 'Processing...' : 'Make Payment'}</span>
-                                        <ArrowRight size={14} />
-                                   </button>
+
+                            {/* Escrow Account */}
+                            <div className="bg-white rounded-lg p-4 lg:p-6 border-2 border-blue-200">
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <Shield size={18} className="text-blue-600 mr-2 lg:w-5 lg:h-5" />
+                                        <p className="text-blue-600 text-sm font-medium">Escrow Account</p>
+                                    </div>
+                                    <div className="text-2xl lg:text-3xl font-bold mb-2 text-blue-600">₦{escrowBalance.toFixed(2)}</div>
+                                    <p className="text-gray-500 text-xs mb-4">Funds held for pending purchases</p>
+                                    <div className="mt-4 pt-4 border-t">
+                                        <p className="text-gray-500 text-sm">Status</p>
+                                        <p className="font-medium text-blue-600">Secure Hold</p>
+                                        <p className="text-blue-500 text-sm">Released when goods delivered</p>
+                                    </div>
+                                    {escrowBalance > 0 && (
+                                        <div className="mt-3 p-2 bg-blue-50 rounded-lg">
+                                            <p className="text-xs text-blue-600">
+                                                Pending: {transactions.filter(t => t.status === 'PENDING').length} transaction(s) awaiting delivery confirmation
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Escrow Account */}
-                        <div className="bg-white rounded-lg p-6 mb-6 border-2 border-blue-200">
-                            <div className="text-center">
-                                <div className="flex items-center justify-center mb-2">
-                                    <Shield size={20} className="text-blue-600 mr-2" />
-                                    <p className="text-blue-600 text-sm font-medium">Escrow Account</p>
+                        {/* Payments Section */}
+                        <div className="xl:col-span-2">
+                            <div className="bg-white rounded-lg p-4 lg:p-6">
+                                {/* Header - Responsive */}
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                                    <h2 className="text-lg lg:text-xl font-bold">My Payments</h2>
+                                    <div className="relative">
+                                        <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 lg:w-4 lg:h-4" />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search" 
+                                            className="w-full sm:w-auto pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-green-500 text-sm"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="text-3xl font-bold mb-2 text-blue-600">₦{escrowBalance.toFixed(2)}</div>
-                                <p className="text-gray-500 text-xs mb-4">Funds held for pending purchases</p>
-                                <div className="mt-4 pt-4 border-t">
-                                    <p className="text-gray-500 text-sm">Status</p>
-                                    <p className="font-medium text-blue-600">Secure Hold</p>
-                                    <p className="text-blue-500 text-sm">Released when goods delivered</p>
+
+                                {/* Tabs - Responsive */}
+                                <div className="flex space-x-4 lg:space-x-8 mb-6 border-b overflow-x-auto">
+                                    <button 
+                                        onClick={() => setActiveTab('all')}
+                                        className={`pb-2 font-medium whitespace-nowrap text-sm lg:text-base ${
+                                            activeTab === 'all' 
+                                                ? 'text-green-600 border-b-2 border-green-600' 
+                                                : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        All Payments
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('escrow')}
+                                        className={`pb-2 font-medium whitespace-nowrap text-sm lg:text-base ${
+                                            activeTab === 'escrow' 
+                                                ? 'text-green-600 border-b-2 border-green-600' 
+                                                : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        Escrow Payments
+                                    </button>
                                 </div>
-                                {escrowBalance > 0 && (
-                                    <div className="mt-3 p-2 bg-blue-50 rounded-lg">
-                                        <p className="text-xs text-blue-600">
-                                            Pending: {transactions.filter(t => t.status === 'PENDING').length} transaction(s) awaiting delivery confirmation
-                                        </p>
+
+                                {/* Transactions List - Mobile Optimized */}
+                                {filteredTransactions.length > 0 ? (
+                                    <div className="space-y-3 lg:space-y-4">
+                                        {filteredTransactions.map((transaction) => (
+                                            <div key={transaction.id || transaction._id} className="border border-gray-200 rounded-lg p-4">
+                                                {/* Mobile Layout */}
+                                                <div className="lg:hidden">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <p className="font-medium text-lg">₦{(transaction.amount || 0).toFixed(2)}</p>
+                                                        <span className={`text-xs px-2 py-1 rounded-full ${
+                                                            transaction.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                            transaction.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                            transaction.status === 'REFUNDED' ? 'bg-red-100 text-red-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                            {transaction.status || 'UNKNOWN'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-500 mb-1">{transaction.description || 'Transaction'}</p>
+                                                    <p className="text-xs text-gray-400 mb-2">{new Date(transaction.date || transaction.createdAt).toLocaleDateString()}</p>
+                                                    {transaction.reference && (
+                                                        <p className="text-xs text-gray-400 mb-2">Ref: {transaction.reference}</p>
+                                                    )}
+                                                    {transaction.status === 'PENDING' && (
+                                                        <div className="flex flex-col sm:flex-row gap-2">
+                                                            <button 
+                                                                onClick={() => handleReleaseEscrow(transaction.id || transaction._id)}
+                                                                className="flex-1 text-xs bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700"
+                                                            >
+                                                                Confirm Delivery
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDisputeRefund(transaction.id || transaction._id)}
+                                                                className="flex-1 text-xs bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700"
+                                                            >
+                                                                Dispute
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Desktop Layout */}
+                                                <div className="hidden lg:flex lg:items-center lg:justify-between">
+                                                    <div className="flex-1">
+                                                        <p className="font-medium">₦{(transaction.amount || 0).toFixed(2)}</p>
+                                                        <p className="text-sm text-gray-500">{transaction.description || 'Transaction'}</p>
+                                                        <p className="text-xs text-gray-400">{new Date(transaction.date || transaction.createdAt).toLocaleDateString()}</p>
+                                                        {transaction.reference && (
+                                                            <p className="text-xs text-gray-400">Ref: {transaction.reference}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className={`text-xs px-2 py-1 rounded-full ${
+                                                            transaction.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                            transaction.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                            transaction.status === 'REFUNDED' ? 'bg-red-100 text-red-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                            {transaction.status || 'UNKNOWN'}
+                                                        </span>
+                                                        {transaction.status === 'PENDING' && (
+                                                            <div className="mt-2 space-x-2">
+                                                                <button 
+                                                                    onClick={() => handleReleaseEscrow(transaction.id || transaction._id)}
+                                                                    className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                                                                >
+                                                                    Confirm Delivery
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDisputeRefund(transaction.id || transaction._id)}
+                                                                    className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                                                                >
+                                                                    Dispute
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 lg:py-12">
+                                        <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <CreditCard size={20} className="text-gray-400 lg:w-6 lg:h-6" />
+                                        </div>
+                                        <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2">No payments yet</h3>
+                                        <p className="text-gray-500 text-sm px-4">Your payment history will appear here once you start making transactions.</p>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
-
-                    {/* Right Column - Payments */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-lg p-6">
-                            {/* Header */}
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold">My Payments</h2>
-                                <div className="relative">
-                                    <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search" 
-                                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Tabs */}
-                            <div className="flex space-x-8 mb-6 border-b">
-                                <button className="pb-2 text-green-600 border-b-2 border-green-600 font-medium">
-                                    All Payments
-                                </button>
-                                <button className="pb-2 text-gray-500 hover:text-gray-700">
-                                    Escrow Payments
-                                </button>
-                            </div>
-
-                            {/* Transactions List */}
-                            {transactions.length > 0 ? (
-                                <div className="space-y-4">
-                                    {transactions.map((transaction) => (
-                                        <div key={transaction.id || transaction._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                                            <div className="flex-1">
-                                                <p className="font-medium">₦{(transaction.amount || 0).toFixed(2)}</p>
-                                                <p className="text-sm text-gray-500">{transaction.description || 'Transaction'}</p>
-                                                <p className="text-xs text-gray-400">{new Date(transaction.date || transaction.createdAt).toLocaleDateString()}</p>
-                                                {transaction.reference && (
-                                                    <p className="text-xs text-gray-400">Ref: {transaction.reference}</p>
-                                                )}
-                                            </div>
-                                            <div className="text-right">
-                                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                                    transaction.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                                    transaction.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                                    transaction.status === 'REFUNDED' ? 'bg-red-100 text-red-800' :
-                                                    'bg-gray-100 text-gray-800'
-                                                }`}>
-                                                    {transaction.status || 'UNKNOWN'}
-                                                </span>
-                                                {transaction.status === 'PENDING' && (
-                                                    <div className="mt-2 space-x-2">
-                                                        <button 
-                                                            onClick={() => handleReleaseEscrow(transaction.id || transaction._id)}
-                                                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                                                        >
-                                                            Confirm Delivery
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDisputeRefund(transaction.id || transaction._id)}
-                                                            className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
-                                                        >
-                                                            Dispute
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <CreditCard size={24} className="text-gray-400" />
-                                    </div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No payments yet</h3>
-                                    <p className="text-gray-500 text-sm">Your payment history will appear here once you start making transactions.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            {/* Payment Modal - Updated for Paystack */}
+            {/* Payment Modal - Responsive */}
             {showTransferModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-96">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg p-4 lg:p-6 w-full max-w-md max-h-screen overflow-y-auto">
                         <h3 className="text-lg font-bold mb-4">Make Payment via Paystack</h3>
                         <div className="mb-4">
                             <p className="text-sm text-gray-600 mb-4">Current Escrow: ₦{escrowBalance.toFixed(2)}</p>
                             <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                                <p className="text-xs text-blue-700 mb-2">
-                                    <Shield size={14} className="inline mr-1" />
+                                <p className="text-xs text-blue-700 mb-1 font-medium">
+
+
+
+
+
+
+
+
+
+
+
+                                   <Shield size={14} className="inline mr-1" />
                                     Secure Escrow Payment:
                                 </p>
-                                <p className="text-xs text-blue-600">
+                                <p className="text-xs sm:text-sm text-blue-600 leading-relaxed">
                                     Payment via Paystack → Funds held in escrow → Seller ships goods → You confirm delivery → Funds released to seller
                                 </p>
                             </div>
@@ -578,23 +696,23 @@ const Account = () => {
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}
                                 placeholder="Enter payment amount (₦)"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm sm:text-base"
                                 step="0.01"
                                 min="1"
                             />
                         </div>
-                        <div className="flex space-x-3">
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                             <button
                                 onClick={() => setShowTransferModal(false)}
                                 disabled={isProcessing}
-                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                                className="w-full sm:flex-1 px-4 py-3 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm sm:text-base"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handlePaystackPayment}
                                 disabled={!transferAmount || parseFloat(transferAmount) <= 0 || isProcessing}
-                                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                className="w-full sm:flex-1 px-4 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 {isProcessing ? 'Processing...' : 'Proceed to Paystack'}
                             </button>

@@ -201,10 +201,10 @@ const Buyer = () => {
         }).format(price);
     };
 
-    const handleViewMore = (product) => {
-    console.log('Navigating to order page with product:', product);
+    const handleViewMore = (id) => {
+    console.log('Navigating to order page with product:', id);
     // Cache the product data so the Order page can access it immediately
-    localStorage.setItem(`product_${product._id}`, JSON.stringify(product));
+    localStorage.setItem(`product_${product._id}`, JSON.stringify(id));
 };
 
     return ( 
@@ -357,7 +357,7 @@ const Buyer = () => {
                                             </div>
                                         )}
                                     </div>
-                                   <Link to={`/order/${product._id}`} onClick={() => handleViewMore(product)}>
+                                   <Link to={`/order/${product._id}`} onClick={() => handleViewMore(id)}>
                                       <button className='w-full py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-green-500 hover:bg-green-800 text-white'>
                                            View More
                                                </button>

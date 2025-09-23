@@ -1,252 +1,313 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, ArrowLeft, ShoppingBag, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, ShoppingCart, Store, User, Lock, Mail } from 'lucide-react';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ 
-    email: '', 
-    password: ''
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    role: 'buyer',
+    rememberMe: false
   });
-  const [error, setError] = useState('');
+  
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [userType, setUserType] = useState('buyer'); // 'buyer' or 'seller'
-  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Determine user type from URL path
-  useEffect(() => {
-    if (location.pathname.includes('/seller')) {
-      setUserType('seller');
-    } else {
-      setUserType('buyer');
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
-  }, [location.pathname]);
+  };
 
-  // Handle navigation after successful login
-  useEffect(() => {
-    if (loginSuccess) {
-      const dashboardRoute = userType === 'buyer' ? '/buyerdashboard' : '/sellerdashboard';
-      console.log('useEffect navigation to:', dashboardRoute);
-      
-      const timer = setTimeout(() => {
-        navigate(dashboardRoute, { replace: true });
-        // Fallback navigation
-        setTimeout(() => {
-          if (window.location.pathname !== dashboardRoute) {
-            window.location.href = dashboardRoute;
-          }
-        }, 100);
-      }, 500);
-      
-      return () => clearTimeout(timer);
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
-  }, [loginSuccess, userType, navigate]);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    if (error) setError('');
+    
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
     setIsLoading(true);
-    setLoginSuccess(false);
-
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://agromart-4tnl.onrender.com';
-    console.log('API Base URL:', baseUrl);
-
-    // Login endpoint
-    const endpoint = '/api/auth/login';
-    const payload = {
-      email: formData.email,
-      password: formData.password
-    };
-
-    console.log('Making request to:', `${baseUrl}${endpoint}`);
-    console.log('Payload:', payload);
-
+    setErrors({});
+    
     try {
-      const res = await axios.post(`${baseUrl}${endpoint}`, payload);
-      console.log('Response:', res.data);
-
-      // Store user data with user type
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          fullName: res.data.fullName,
-          email: res.data.email,
-          _id: res.data._id,
-          userType: userType, // Use the current userType
-          phone: res.data.phone,
-          address: res.data.address,
+      const response = await fetch('https://agromart-4tnl.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: formData.role
         })
-      );
+      });
       
-      console.log('Token stored:', localStorage.getItem('token'));
-      console.log('User stored:', localStorage.getItem('user'));
+      const data = await response.json();
       
-      alert(`${userType === 'buyer' ? 'Buyer' : 'Seller'} login successful!`);
-      
-      // Trigger navigation via useEffect
-      setLoginSuccess(true);
-      
-    } catch (err) {
-      console.error('Request failed:', err);
-      console.error('Error response:', err.response?.data);
-      setError(err.response?.data?.message || 'Login failed');
+      if (response.ok) {
+        console.log('Login response data:', data);
+        
+        // Store token - consistent with Auth.jsx
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+        }
+        
+        // Store user data in the EXACT format that App.jsx expects
+        const userData = {
+          fullName: data.fullName || data.name || data.user?.fullName || data.user?.name || '',
+          email: data.email || data.user?.email || formData.email,
+          _id: data._id || data.id || data.user?._id || data.user?.id || '',
+          userType: formData.role, // This is crucial - matches App.jsx expectations
+          phone: data.phone || data.user?.phone || '',
+          address: data.address || data.user?.address || '',
+          // Add any additional fields that might be useful
+          role: formData.role, // Backup field
+          verified: data.verified || data.user?.verified || false
+        };
+        
+        // Log for debugging
+        console.log('Storing user data:', userData);
+        
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Verify storage worked
+        console.log('Token stored:', localStorage.getItem('token'));
+        console.log('User stored:', JSON.parse(localStorage.getItem('user')));
+        
+        setShowSuccess(true);
+        
+        // Navigate to appropriate dashboard
+        const dashboardRoute = formData.role === 'buyer' ? '/buyerdashboard' : '/sellerdashboard';
+        
+        // Navigate immediately - don't wait for timeout
+        navigate(dashboardRoute, { replace: true });
+        
+        // Optional: Show success message briefly
+        // setTimeout(() => {
+        //   navigate(dashboardRoute, { replace: true });
+        // }, 1000);
+        
+      } else {
+        // Handle API errors
+        console.error('Login failed:', data);
+        if (data.errors) {
+          setErrors(data.errors);
+        } else {
+          setErrors({ general: data.message || 'Login failed. Please try again.' });
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrors({ general: 'Network error. Please check your connection and try again.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getUserTypeDisplay = () => {
-    return userType === 'buyer' ? 'Buyer' : 'Seller';
-  };
-
-  const getUserTypeIcon = () => {
-    return userType === 'buyer' ? <ShoppingBag className="h-6 w-6" /> : <User className="h-6 w-6" />;
-  };
-
-  const getAuthDescription = () => {
-    return userType === 'buyer' 
-      ? 'Sign in to start shopping' 
-      : 'Sign in to manage your products';
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-600 via-green-500 to-blue-500 flex items-center justify-center p-4">
-      {/* Back to Home Button */}
-      <Link 
-        to="/welcome" 
-        className="absolute top-6 left-6 flex items-center text-white hover:text-green-200 transition-colors duration-200"
-      >
-        <ArrowLeft className="h-5 w-5 mr-2" />
-        Back to Home
-      </Link>
-
-      {/* Login Card */}
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="p-8">
-          {/* User Type Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              <div className="text-green-600">
-                {getUserTypeIcon()}
-              </div>
-            </div>
-            <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-2">
-              {getUserTypeDisplay()} Account
-            </div>
-          </div>
-
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-500 via-green-600 to-indigo-700">
+      <div className="w-full max-w-md">
+        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
+          {/* Logo */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Welcome Back
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-600 bg-clip-text text-transparent mb-2">
+              AgroMart
             </h1>
-            <p className="text-gray-600">
-              {getAuthDescription()}
-            </p>
+            <p className="text-gray-600 text-lg">Connect. Trade. Grow.</p>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6" role="alert">
-              {error}
+          {/* Success Message */}
+          {showSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-800 text-center animate-pulse">
+              ✅ Login successful! Redirecting to {formData.role} dashboard...
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
-            <div>
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
-                disabled={isLoading}
-                autoComplete="email"
-              />
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-center">
+              ⚠️ {errors.general}
             </div>
+          )}
 
-            {/* Password Field */}
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
-                disabled={isLoading}
-                autoComplete="current-password"
-                minLength="6"
-              />
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              {/* Role Selector */}
+              <div className="grid grid-cols-2 gap-2 p-2 bg-gray-100 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, role: 'buyer' }))}
+                  className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                    formData.role === 'buyer'
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <ShoppingCart size={18} />
+                  <span>Buyer</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, role: 'seller' }))}
+                  className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                    formData.role === 'seller'
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <Store size={18} />
+                  <span>Seller</span>
+                </button>
+              </div>
+
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="flex items-center gap-2 text-gray-700 font-semibold">
+                  <Mail size={16} />
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                    className={`w-full px-4 py-4 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-300 ${
+                      errors.email ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                    }`}
+                    disabled={isLoading}
+                  />
+                  {formData.email && (
+                    <User className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  )}
+                </div>
+                {errors.email && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    ⚠️ {errors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label htmlFor="password" className="flex items-center gap-2 text-gray-700 font-semibold">
+                  <Lock size={16} />
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="Enter your password"
+                    className={`w-full px-4 py-4 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-300 ${
+                      errors.password ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                    }`}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    ⚠️ {errors.password}
+                  </p>
+                )}
+              </div>
+
+              {/* Form Options */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleInputChange}
+                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                    disabled={isLoading}
+                  />
+                  <span className="text-gray-600">Remember me</span>
+                </label>
+                <a href="#" className="text-green-600 hover:text-green-600 font-semibold transition-colors">
+                  Forgot Password?
+                </a>
+              </div>
+
+              {/* Submit Button */}
               <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                title={showPassword ? 'Hide password' : 'Show password'}
+                type="submit"
                 disabled={isLoading}
+                className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:transform-none disabled:cursor-not-allowed relative overflow-hidden"
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                <span className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+                  Sign In as {formData.role === 'buyer' ? 'Buyer' : 'Seller'}
+                </span>
+                {isLoading && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  </span>
+                )}
               </button>
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed mt-6"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Please wait...
-                </div>
-              ) : (
-                `Sign In as ${getUserTypeDisplay()}`
-              )}
-            </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <span className="text-gray-600">
+          {/* Sign Up Link */}
+          <div className="text-center mt-6">
+            <p className="text-gray-600">
               Don't have an account?{' '}
-            </span>
-            <Link
-              to={`/auth/${userType}`}
-              className="text-green-600 hover:text-green-700 font-semibold transition-colors duration-200"
-            >
-              Create Account
-            </Link>
-          </div>
-
-          {/* Switch User Type */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="text-center">
-              <span className="text-gray-600 text-sm">
-                Looking to {userType === 'buyer' ? 'sell' : 'buy'} instead?{' '}
-              </span>
-              <Link
-                to={userType === 'buyer' ? '/login/seller' : '/login/buyer'}
-                className="text-green-600 hover:text-green-700 font-medium text-sm transition-colors duration-200"
-              >
-                {userType === 'buyer' ? 'Seller Login' : 'Buyer Login'}
-              </Link>
-            </div>
+              <a href="/auth" className="text-green-600 hover:text-green-600 font-semibold transition-colors">
+                Sign up here
+              </a>
+            </p>
           </div>
         </div>
-
-        {/* Decorative Bottom */}
-        <div className="h-2 bg-gradient-to-r from-green-500 to-blue-500"></div>
       </div>
     </div>
   );

@@ -453,7 +453,7 @@ const Auth = () => {
                   Please wait...
                 </div>
               ) : (
-                isRegister ? `Create ${getUserTypeDisplay()} Account` : `Sign In as ${getUserTypeDisplay()}`
+                isRegister ? `Create ${getUserTypeDisplay()} Account` : `Sign Up as ${getUserTypeDisplay()}`
               )}
             </button>
           </form>
