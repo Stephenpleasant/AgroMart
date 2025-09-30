@@ -34,7 +34,7 @@ const Sellers = () => {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agromart-4tnl.onrender.com';
     const API_ENDPOINTS = {
         sellerProducts: `${API_BASE_URL}/api/products/seller/${currentSellerId}`,
-        uploadProduct: `${API_BASE_URL}/api/products/upload`,
+        uploadProduct: `${API_BASE_URL}/api/product/add-product`,
         updateProduct: `${API_BASE_URL}/api/products`,
         deleteProduct: `${API_BASE_URL}/api/products`
     };

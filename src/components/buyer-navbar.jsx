@@ -17,6 +17,7 @@ const BuyerNavbar = () => {
     { to: "/notifications", icon: Bell, label: "Notification" },
     { to: "/support", icon: HelpCircle, label: "Support" },
     { to: "/settings", icon: Settings, label: "Settings" },
+    { to: "/logout", icon: LogOut, label: "Log out" }
   ];
 
   return (

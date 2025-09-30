@@ -19,7 +19,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-lg z-50 transition-all duration-300">
+    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-md z-50 transition-all duration-300">
       {/* Overlay to close dropdown when clicking outside */}
       {isSignInDropdownOpen && (
         <div 
@@ -28,27 +28,28 @@ const Navbar = () => {
         />
       )}
       
-      <nav className="bg-white shadow-sm">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                  <div className="flex items-center space-x-2">
-                    <Leaf className="h-8 w-8 text-green-500" />
-                    <span className="text-xl font-bold text-gray-800">AgroMart</span>
-                  </div>
-                  <div className="hidden md:flex items-center space-x-8">
-                    <a href="#home" className="text-gray-600 hover:text-gray-800">Home</a>
-                    <a href="#about" className="text-gray-600 hover:text-gray-800">About</a>
-                    <a href="#products" className="text-gray-600 hover:text-gray-800">How it works</a>
-                    <a href="#contact" className="text-gray-600 hover:text-gray-800">Contact us</a>
-                  </div>
-            
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 md:h-16">
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <Leaf className="h-6 w-6 md:h-8 md:w-8 text-green-500" />
+            <span className="text-lg md:text-xl font-bold text-gray-800">AgroMart</span>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#home" className="text-gray-600 hover:text-gray-800 transition-colors">Home</a>
+            <a href="#about" className="text-gray-600 hover:text-gray-800 transition-colors">About</a>
+            <a href="#products" className="text-gray-600 hover:text-gray-800 transition-colors">How it works</a>
+            <a href="#contact" className="text-gray-600 hover:text-gray-800 transition-colors">Contact us</a>
+          
             {/* Sign In Dropdown */}
             <div className="relative">
               <button
                 onClick={toggleSignInDropdown}
                 className="relative text-gray-700 hover:text-green-600 font-medium transition-colors duration-200 group flex items-center space-x-1"
               >
-                <span>Sign In</span>
+                <span>Sign Up</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
                   isSignInDropdownOpen ? 'rotate-180' : ''
                 }`} />
@@ -65,7 +66,7 @@ const Navbar = () => {
                   >
                     <ShoppingBag className="h-4 w-4 mr-3" />
                     <div>
-                      <div className="font-medium">Sign in as Buyer</div>
+                      <div className="font-medium">Sign up as Buyer</div>
                       <div className="text-sm text-gray-500">Purchase fresh products</div>
                     </div>
                   </Link>
@@ -76,7 +77,7 @@ const Navbar = () => {
                   >
                     <User className="h-4 w-4 mr-3" />
                     <div>
-                      <div className="font-medium">Sign in as Seller</div>
+                      <div className="font-medium">Sign up as Seller</div>
                       <div className="text-sm text-gray-500">Sell your products</div>
                     </div>
                   </Link>
@@ -93,68 +94,85 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            <Link 
+              to="/login" 
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors duration-200"
+            >
+              Login
+            </Link>
             <button
               onClick={toggleMenu}
-              className="p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-gray-100 transition-colors duration-200"
+              className="p-1.5 rounded-md text-gray-700 hover:text-green-600 hover:bg-gray-100 transition-colors duration-200"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-5 w-5" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className={`md:hidden transition-all duration-300 ease-in-out ${
+        {/* Mobile Navigation - Compact */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
           isMenuOpen 
-            ? 'max-h-80 opacity-100 pb-6' 
-            : 'max-h-0 opacity-0 overflow-hidden'
+            ? 'max-h-64 opacity-100' 
+            : 'max-h-0 opacity-0'
         }`}>
-          <div className="space-y-3 pt-4 border-t border-gray-200">
-            <Link 
-              to="/" 
+          <div className="py-3 border-t border-gray-200 space-y-1">
+            <a 
+              href="#home"
               onClick={toggleMenu}
-              className="block px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg font-medium transition-colors duration-200"
+              className="block px-3 py-2 text-sm text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
             >
               Home
-            </Link>
-            
-            {/* Mobile Sign In Options */}
-            <div className="px-4 py-2">
-              <div className="text-gray-700 font-medium mb-2">Sign In As:</div>
-              <div className="space-y-2 ml-2">
-                <Link 
-                  to="/auth/buyer" 
-                  onClick={toggleMenu}
-                  className="flex items-center px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-                >
-                  <ShoppingBag className="h-4 w-4 mr-2" />
-                  Buyer
-                </Link>
-                <Link 
-                  to="/auth/seller" 
-                  onClick={toggleMenu}
-                  className="flex items-center px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Seller
-                </Link>
-              </div>
-            </div>
-            
-            <Link 
-              to="/dashboard" 
+            </a>
+            <a 
+              href="#about"
               onClick={toggleMenu}
-              className="block mx-4 py-2 px-4 bg-green-600 hover:bg-green-700 text-white text-center rounded-full font-medium transition-colors duration-200"
+              className="block px-3 py-2 text-sm text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
             >
-              Dashboard
-            </Link>
+              About
+            </a>
+            <a 
+              href="#products"
+              onClick={toggleMenu}
+              className="block px-3 py-2 text-sm text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            >
+              How it works
+            </a>
+            <a 
+              href="#contact"
+              onClick={toggleMenu}
+              className="block px-3 py-2 text-sm text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            >
+              Contact us
+            </a>
+            
+            {/* Mobile Sign Up Options - Compact */}
+            <div className="pt-2 border-t border-gray-200 mt-2">
+              <p className="px-3 py-1 text-xs text-gray-500 font-medium">Sign Up</p>
+              <Link 
+                to="/auth/buyer" 
+                onClick={toggleMenu}
+                className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+              >
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                Buyer
+              </Link>
+              <Link 
+                to="/auth/seller" 
+                onClick={toggleMenu}
+                className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Seller
+              </Link>
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
     </nav>
   );
 };

@@ -11,6 +11,7 @@ import Profile from "./seller/profile";
 import Wallet from "./seller/wallet";
 import AgroMartChat from "./components/Al";
 import Order from "./buyer/order";
+import Logout from "./components/logout";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -96,6 +97,12 @@ function App() {
       <Route 
         path="/sellerdashboard" 
         element={isAuthenticated() ? <Sellers /> : <Navigate to="/auth/seller" replace />} 
+      />
+
+      {/* Logout route */}
+      <Route 
+        path="/logout" 
+        element={isAuthenticated() ? <Logout /> : <Navigate to="/welcome" replace />} 
       />
       
       <Route 
